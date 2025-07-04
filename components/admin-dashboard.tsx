@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Star, Trash2, Check, X, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -12,6 +13,7 @@ import type { Feedback } from "@/lib/database"
 export function AdminDashboard() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("all")
   const { toast } = useToast()
   const router = useRouter()
 
@@ -124,6 +126,94 @@ export function AdminDashboard() {
     }
   }
 
+  // Filter feedbacks based on status
+  const allFeedbacks = feedbacks
+  const approvedFeedbacks = feedbacks.filter((feedback) => feedback.approved === true)
+  const rejectedFeedbacks = feedbacks.filter((feedback) => feedback.approved === false && feedback.id !== undefined)
+  const pendingFeedbacks = feedbacks.filter((feedback) => feedback.approved === false)
+
+  // Get counts for badges
+  const counts = {
+    all: allFeedbacks.length,
+    approved: approvedFeedbacks.length,
+    rejected: rejectedFeedbacks.length,
+    pending: pendingFeedbacks.length,
+  }
+
+  function renderFeedbackCard(feedback: Feedback, showApproveButton = false, showDisapproveButton = false) {
+    return (
+      <Card key={feedback.id}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <CardTitle className="text-lg">{feedback.name}</CardTitle>
+              <Badge variant={feedback.approved ? "default" : "secondary"}>
+                {feedback.approved ? "Approved" : "Pending"}
+              </Badge>
+              {feedback.rating && (
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: feedback.rating }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {showApproveButton && (
+                <Button
+                  size="sm"
+                  onClick={() => handleApprove(feedback.id, true)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Check className="w-4 h-4 mr-1" />
+                  Approve
+                </Button>
+              )}
+              {showDisapproveButton && (
+                <Button size="sm" variant="outline" onClick={() => handleApprove(feedback.id, false)}>
+                  <X className="w-4 h-4 mr-1" />
+                  Disapprove
+                </Button>
+              )}
+              <Button size="sm" variant="destructive" onClick={() => handleDelete(feedback.id)}>
+                <Trash2 className="w-4 h-4 mr-1" />
+                Delete
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <span>{feedback.email}</span>
+            <span>{new Date(feedback.created_at).toLocaleDateString()}</span>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-700">{feedback.message}</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  function renderFeedbackList(
+    feedbackList: Feedback[],
+    emptyMessage: string,
+    showApproveButton = false,
+    showDisapproveButton = false,
+  ) {
+    if (feedbackList.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">{emptyMessage}</p>
+        </div>
+      )
+    }
+
+    return (
+      <div className="grid gap-6">
+        {feedbackList.map((feedback) => renderFeedbackCard(feedback, showApproveButton, showDisapproveButton))}
+      </div>
+    )
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -146,63 +236,74 @@ export function AdminDashboard() {
           </Button>
         </div>
 
-        {feedbacks.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No feedback available.</p>
-          </div>
-        ) : (
-          <div className="grid gap-6">
-            {feedbacks.map((feedback) => (
-              <Card key={feedback.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <CardTitle className="text-lg">{feedback.name}</CardTitle>
-                      <Badge variant={feedback.approved ? "default" : "secondary"}>
-                        {feedback.approved ? "Approved" : "Pending"}
-                      </Badge>
-                      {feedback.rating && (
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: feedback.rating }).map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!feedback.approved ? (
-                        <Button
-                          size="sm"
-                          onClick={() => handleApprove(feedback.id, true)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <Check className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={() => handleApprove(feedback.id, false)}>
-                          <X className="w-4 h-4 mr-1" />
-                          Disapprove
-                        </Button>
-                      )}
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(feedback.id)}>
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>{feedback.email}</span>
-                    <span>{new Date(feedback.created_at).toLocaleDateString()}</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700">{feedback.message}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              All
+              {counts.all > 0 && (
+                <Badge variant="secondary" className="ml-1 px-2 py-0 text-xs">
+                  {counts.all}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="flex items-center gap-2">
+              Approved
+              {counts.approved > 0 && (
+                <Badge variant="default" className="ml-1 px-2 py-0 text-xs">
+                  {counts.approved}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="rejected" className="flex items-center gap-2">
+              Rejected
+              {counts.rejected > 0 && (
+                <Badge variant="destructive" className="ml-1 px-2 py-0 text-xs">
+                  {counts.rejected}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="flex items-center gap-2">
+              Pending
+              {counts.pending > 0 && (
+                <Badge variant="outline" className="ml-1 px-2 py-0 text-xs">
+                  {counts.pending}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="mt-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">All Feedback</h2>
+              <p className="text-gray-600">View and manage all feedback submissions</p>
+            </div>
+            {renderFeedbackList(allFeedbacks, "No feedback available.")}
+          </TabsContent>
+
+          <TabsContent value="approved" className="mt-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Approved Feedback</h2>
+              <p className="text-gray-600">Feedback that is visible to the public</p>
+            </div>
+            {renderFeedbackList(approvedFeedbacks, "No approved feedback yet.", false, true)}
+          </TabsContent>
+
+          <TabsContent value="rejected" className="mt-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Rejected Feedback</h2>
+              <p className="text-gray-600">Feedback that has been disapproved</p>
+            </div>
+            {renderFeedbackList(rejectedFeedbacks, "No rejected feedback.", true, false)}
+          </TabsContent>
+
+          <TabsContent value="pending" className="mt-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Pending Feedback</h2>
+              <p className="text-gray-600">New feedback awaiting approval</p>
+            </div>
+            {renderFeedbackList(pendingFeedbacks, "No pending feedback.", true, false)}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
