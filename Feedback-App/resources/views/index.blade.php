@@ -64,8 +64,8 @@
     <h1 class="mb-4 text-primary">Welcome to Feedback App</h1>
     <p class="mb-4 text-muted">Help us improve by sharing your thoughts or log in as admin to manage feedback.</p>
     <div>
-      <a href="feedback.html" class="btn btn-primary btn-lg me-3">Submit Feedback</a>
-      <a href="admin-login.html" class="btn btn-outline-secondary btn-lg">Admin Login</a>
+      <a href="{{ url('/feedback') }}" class="btn btn-primary btn-lg me-3">Submit Feedback</a>
+      <a href="{{ url('/admin-login') }}" class="btn btn-outline-secondary btn-lg">Admin Login</a>
     </div>
   </div>
 </div>
@@ -77,9 +77,9 @@
 
 <!-- Scripts -->
 <script>
-  // Auto redirect to dashboard if already logged in
+  // Redirect to admin dashboard if already logged in
   if (localStorage.getItem('admin_logged_in')) {
-    window.location.href = 'admin-dashboard.html';
+    window.location.href = "{{ url('/admin-dashboard') }}";
   }
 
   // Set current year in footer
@@ -104,15 +104,8 @@
     }
   });
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
-<script>
-  // Redirect to admin dashboard if already logged in
-  if (localStorage.getItem('admin_logged_in')) {
-    window.location.href = 'admin-dashboard.html';
-  }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Dark mode toggle logic
