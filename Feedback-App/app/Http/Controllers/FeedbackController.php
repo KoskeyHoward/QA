@@ -2,55 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Feedback;
+use Illuminate\Http\Request;
 
 class FeedbackController extends Controller
 {
-    // READ: Show approved feedback
-    public function index()
-    {
-        return Feedback::where('approved', true)->get();
-    }
-
-    // CREATE: Store new feedback
+    // Store public feedback submission
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'message' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'message' => 'required|string|max:500',
             'rating' => 'nullable|integer|min:1|max:5'
         ]);
 
-        return Feedback::create($validated);
+        Feedback::create($validated);
+
+        return back()->with('success', 'Thank you for your feedback!');
     }
 
-    // UPDATE: Approve a feedback
-    public function update(Request $request, $id)
+    // Admin dashboard view
+    public function dashboard()
     {
-        $feedback = Feedback::findOrFail($id);
-        $feedback->approved = $request->input('approved', true);
-        $feedback->save();
+        $pendingFeedback = Feedback::where('approved', false)->latest()->get();
+        $approvedFeedback = Feedback::where('approved', true)->latest()->get();
 
-        return response()->json(['message' => 'Feedback approved']);
+        return view('dashboard', compact('pendingFeedback', 'approvedFeedback'));
     }
 
-    // DELETE: Remove a feedback
-    public function destroy($id)
+    // Approve feedback
+    public function approve(Feedback $feedback)
     {
-        Feedback::destroy($id);
-        return response()->json(['message' => 'Feedback deleted']);
-    }
-    // New method for admin to get all unapproved feedback
-    public function unapproved()
-    {
-    return Feedback::where('approved', false)->get();
+        $feedback->update(['approved' => true]);
+
+        return back()->with('success', 'Feedback approved!');
     }
 
-    // New method for admin to get all feedback
-    public function all()
+    // Delete feedback
+    public function destroy(Feedback $feedback)
     {
-        return Feedback::all();
+        $feedback->delete();
+
+        return back()->with('success', 'Feedback deleted!');
     }
 }
