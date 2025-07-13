@@ -75,7 +75,7 @@
                         </a>
                     @else
                         <a href="{{ route('login') }}" class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal">
-                            Log in
+                            Admin log in
                         </a>
                     @endauth
                 </nav>
@@ -85,7 +85,7 @@
         <div class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
             <main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
                 <div class="container d-flex justify-content-center align-items-center min-vh-100">
-                    <div class="welcome-box text-center">
+                    <div class="text-center welcome-box">
                         <h1 class="mb-4 text-primary">Welcome to Feedback App</h1>
                         <p class="mb-4 text-muted">Help us improve by sharing your thoughts or log in as admin to manage feedback.</p>
                         <div>
@@ -99,11 +99,11 @@
 
         <!-- Approved Feedback Section -->
         <div class="w-full lg:max-w-4xl max-w-[335px] mt-8">
-            <h2 class="text-center mb-4">Recent Feedback</h2>
+            <h2 class="mb-4 text-center">Recent Feedback</h2>
             <div class="space-y-4">
                 @foreach(\App\Models\Feedback::where('approved', true)->latest()->take(5)->get() as $feedback)
                     <div class="p-4 bg-white dark:bg-[#161615] rounded-lg shadow-sm">
-                        <div class="flex justify-between items-start">
+                        <div class="flex items-start justify-between">
                             <div>
                                 <h3 class="font-medium">{{ $feedback->name }}</h3>
                                 <p class="text-sm text-[#706f6c] dark:text-[#A1A09A]">{{ $feedback->email }}</p>
