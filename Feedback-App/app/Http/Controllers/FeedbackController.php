@@ -19,7 +19,7 @@ class FeedbackController extends Controller
 
         Feedback::create($validated);
 
-        return back()->with('success', 'Thank you for your feedback!');
+        return redirect('/')->with('success', '✅ Thank you! Your feedback has been submitted.');
     }
 
     // Admin dashboard view

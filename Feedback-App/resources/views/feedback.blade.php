@@ -36,8 +36,8 @@
                     <h3 class="mb-4 text-center text-primary">Submit Your Feedback</h3>
 
                     @if(session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
+                        <div class="alert alert-success text-center" id="successMessage">
+                         {{ session('success') }}
                         </div>
                     @endif
 
@@ -80,7 +80,7 @@
                                         {{ $i <= old('rating', 0) ? '★' : '☆' }}
                                     </span>
                                 @endfor
-                                <input type="hidden" name="rating" id="rating" value="{{ old('rating', 0) }}">
+                                <input type="hidden" name="rating" id="rating" value="{{ old('rating', '') }}">
                             </div>
                         </div>
 
@@ -92,21 +92,22 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const stars = document.querySelectorAll('.star');
-            const ratingInput = document.getElementById('rating');
+       document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('rating');
 
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    const value = parseInt(this.getAttribute('data-value'));
-                    ratingInput.value = value;
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const value = parseInt(this.getAttribute('data-value'));
+            ratingInput.value = value;
 
-                    stars.forEach((s, index) => {
-                        s.textContent = index < value ? '★' : '☆';
-                    });
-                });
+            stars.forEach((s, index) => {
+                s.textContent = index < value ? '★' : '☆';
+                s.classList.toggle('active', index < value);
             });
         });
+    });
+});
     </script>
 </body>
 </html>
