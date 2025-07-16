@@ -39,6 +39,14 @@ class FeedbackController extends Controller
         return back()->with('success', 'Feedback approved!');
     }
 
+    // Disapprove feedback (new method)
+    public function disapprove(Feedback $feedback)
+    {
+        $feedback->update(['approved' => false]);
+
+        return back()->with('success', 'Feedback disapproved!');
+    }
+
     // Delete feedback
     public function destroy(Feedback $feedback)
     {

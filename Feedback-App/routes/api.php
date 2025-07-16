@@ -11,3 +11,6 @@ Route::delete('/feedback/{id}', [FeedbackController::class, 'destroy']);
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::get('/admin/feedbacks', [FeedbackController::class, 'unapproved']);
 Route::get('/admin/all-feedbacks', [FeedbackController::class, 'all']);
+Route::post('/feedback/{feedback}/disapprove', [FeedbackController::class, 'disapprove'])
+    ->name('feedback.disapprove')
+    ->middleware('auth'); // assuming this is an admin-only route
